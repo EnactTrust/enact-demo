@@ -18,8 +18,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/lestrrat-go/jwx/jwa"
-	"github.com/lestrrat-go/jwx/jwk"
+	"github.com/lestrrat-go/jwx/v2/jwa"
+	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/veraison/apiclient/common"
 	"github.com/veraison/apiclient/provisioning"
 	"github.com/veraison/apiclient/verification"
@@ -114,7 +114,7 @@ func EarCheck(b []byte) error {
 
 	var r ear.AttestationResult
 
-	if err := r.Verify(b, jwa.ES256, k); err != nil {
+	if err := r.Verify(b, jwa.KeyAlgorithmFrom(jwa.ES256), k); err != nil {
 		return fmt.Errorf("verification failed: %w", err)
 	}
 
