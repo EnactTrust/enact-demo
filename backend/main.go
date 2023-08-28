@@ -332,6 +332,10 @@ func setupRoutes(nodeService *node.NodeService) *gin.Engine {
 				"error": err.Error(),
 			})
 		} else {
+			log.Println("nodeid:")
+			log.Println(node_id_blob_buff.String())
+			log.Println("veraisonSessiontable")
+			log.Println(VeraisonSessionTable)
 			err = nodeService.RouteEvidenceToVeraison(globalCfg, VeraisonSessionTable[node_id_blob_buff.String()], uuidNodeId, evidence_blob_buf, signature_blob_buf, evidenceDigest)
 			if err != nil {
 				log.Println(err.Error())
