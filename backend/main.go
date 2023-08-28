@@ -233,7 +233,14 @@ func setupRoutes(nodeService *node.NodeService) *gin.Engine {
 
 	r.POST("/node/evidence", func(c *gin.Context) {
 		// Read POST submitted files - this gets their file headers
-		nodeID := c.PostForm("node_id")
+		// nodeID := c.PostForm("node_id")
+		node_id_blob, err := c.FormFile("node_id")
+		if err != nil {
+			log.Println(err.Error())
+			c.JSON(400, gin.H{
+				"error": err.Error(),
+			})
+		}
 
 		evidence_blob, err := c.FormFile("evidence_blob")
 		if err != nil {
@@ -248,6 +255,21 @@ func setupRoutes(nodeService *node.NodeService) *gin.Engine {
 			c.JSON(400, gin.H{
 				"error": err.Error(),
 			})
+		}
+
+		// Allocate buffers, so we can read the files
+		node_id_blob_buff := bytes.NewBuffer(nil)
+
+		// Get multipart.File from FileHeader
+		node_id_blob_file, err := node_id_blob.Open()
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		// Read the file into a buffer
+		_, err = io.Copy(node_id_blob_buff, node_id_blob)
+		if err != nil {
+			log.Println(err.Error())
 		}
 
 		// Allocate buffers, so we can read the files
@@ -282,7 +304,7 @@ func setupRoutes(nodeService *node.NodeService) *gin.Engine {
 		}
 
 		// err = nodeService.HandleEvidence(nodeID, evidence_blob_buf, signature_blob_buf)
-		evidenceDigest, nonce, uuidNodeId, err := nodeService.ProcessEvidence(nodeID, evidence_blob_buf, signature_blob_buf)
+		evidenceDigest, nonce, uuidNodeId, err := nodeService.ProcessEvidence(node_id_blob_buff.String(), evidence_blob_buf, signature_blob_buf)
 		_ = nonce
 
 		if err != nil {
@@ -291,7 +313,7 @@ func setupRoutes(nodeService *node.NodeService) *gin.Engine {
 				"error": err.Error(),
 			})
 		} else {
-			err = nodeService.RouteEvidenceToVeraison(globalCfg, VeraisonSessionTable[nodeID], uuidNodeId, evidence_blob_buf, signature_blob_buf, evidenceDigest)
+			err = nodeService.RouteEvidenceToVeraison(globalCfg, VeraisonSessionTable[node_id_blob_buff.String()], uuidNodeId, evidence_blob_buf, signature_blob_buf, evidenceDigest)
 			if err != nil {
 				log.Println(err.Error())
 				c.JSON(500, gin.H{
