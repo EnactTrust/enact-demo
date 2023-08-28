@@ -234,11 +234,15 @@ func (n *NodeService) RouteGoldenValueToVeraison(cfg *verification.ChallengeResp
 
 	// POST to Veraison
 	attestationResultJSON, err := veraison.SendEvidenceAndSignature(cfg, sessionId, concatenatedData)
+    if err != nil {
+		log.Println("SendEvidenceAndSignature result: FAILURE %v", err)
+		return err
+    }
 
 	// Parse attestation result
 	err = veraison.EarCheck(attestationResultJSON)
 	if err != nil {
-		log.Println("Attestation result: FAILURE")
+		log.Println("Attestation result: FAILURE %v", err)
 		return err
 	}
 
