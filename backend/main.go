@@ -267,7 +267,7 @@ func setupRoutes(nodeService *node.NodeService) *gin.Engine {
 		}
 
 		// Read the file into a buffer
-		_, err = io.Copy(node_id_blob_buff, node_id_blob)
+		_, err = io.Copy(node_id_blob_buff, node_id_blob_file)
 		if err != nil {
 			log.Println(err.Error())
 		}
