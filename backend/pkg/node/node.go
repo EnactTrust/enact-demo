@@ -267,6 +267,10 @@ func (n *NodeService) RouteEvidenceToVeraison(cfg *verification.ChallengeRespons
 
 	// POST to Veraison
 	attestationResultJSON, err := veraison.SendEvidenceAndSignature(cfg, sessionId, concatenatedData)
+	if err != nil {
+		log.Println(err)
+	}
+	
 
 	// Parse attestation result
 	err = veraison.EarCheck(attestationResultJSON)
