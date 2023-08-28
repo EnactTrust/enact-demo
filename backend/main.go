@@ -231,6 +231,8 @@ func setupRoutes(nodeService *node.NodeService) *gin.Engine {
 		// evidenceDigest, uuidNodeId, err := nodeService.HandleGoldenValue(nodeID, golden_blob_buf, signature_blob_buf)
 		evidenceDigest, nonce, uuidNodeId, err := nodeService.ProcessEvidence(node_id_blob_buff.String(), golden_blob_buf, signature_blob_buf)
 
+		log.Println("golden_blob_buff length - after ProcessEvidence: ", len(golden_blob_buf.Bytes()))
+		log.Println("signature_blob_buff length - after ProcessEvidence: ", len(signature_blob_buf.Bytes()))
 		_ = nonce
 
 		if err != nil {
