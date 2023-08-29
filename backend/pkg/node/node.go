@@ -64,6 +64,8 @@ func (n *NodeService) HandleReceivePEM(akPub string, ekPub string) (uuid.UUID, e
 		return nodeID, err
 	}
 
+	log.Println(fmt.Sprintf("%x", nodeID))
+
 	// 3. Init node entity and store it in the db
 	node := Node{
 		ID:         nodeID,
@@ -230,8 +232,10 @@ func parseKey(keyString string) (*ecdsa.PublicKey, error) {
 // golden value is node_id, tmps_attest_length, tpms_attest. Just concatenate it with signature blob.
 func (n *NodeService) RouteGoldenValueToVeraison(cfg *verification.ChallengeResponseConfig, sessionId string, nodeID uuid.UUID, bigEndianBuf []byte, evidenceDigest []byte) error {
 	// concatenate bytes, because Veraison expects a continious array
-	var concatenatedData []byte = append(nodeID[:], bigEndianBuf...)
 
+	log.Println(fmt.Sprintf("%x", nodeID))
+	var concatenatedData []byte = append(nodeID[:], bigEndianBuf...)
+	log.Println(fmt.Sprintf("%x", nodeID))
 	log.Println("concatenatedData length: ", len(concatenatedData))
 	// POST to Veraison
 	attestationResultJSON, err := veraison.SendEvidenceAndSignature(cfg, sessionId, concatenatedData)
@@ -330,7 +334,7 @@ func (n *NodeService) HandleGoldenValue(nodeID string, goldenBlob *bytes.Buffer,
 	val := goldenBlob.Next(16)
 	uuidNodeId, err := uuid.FromBytes(val)
 
-	fmt.Sprintf("%x", uuidNodeId)
+	log.Println(fmt.Sprintf("%x", uuidNodeId))
 
 	if err != nil {
 		log.Println(err)

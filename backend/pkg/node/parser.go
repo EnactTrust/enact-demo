@@ -38,7 +38,7 @@ func parseEvidenceAndSignatureBlobs(evidenceBlob *bytes.Buffer, signatureBlob *b
 		log.Println(err)
 		return nil, uuid.UUID{}, err
 	}
-	fmt.Sprintf("%x", uuidNodeId)
+	log.Println(fmt.Sprintf("%x", uuidNodeId))
 
 	// 0. TPMS_ATTEST Size
 	val = evidenceBlob.Next(2)
