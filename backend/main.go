@@ -181,21 +181,6 @@ func setupRoutes(nodeService *node.NodeService) *gin.Engine {
 			})
 		}
 
-		golden_blob_2, err := c.FormFile("golden_blob")
-		if err != nil {
-			log.Println(err.Error())
-			c.JSON(400, gin.H{
-				"error": err.Error(),
-			})
-		}
-		signature_blob_2, err := c.FormFile("signature_blob")
-		if err != nil {
-			log.Println(err.Error())
-			c.JSON(400, gin.H{
-				"error": err.Error(),
-			})
-		}
-
 		// Allocate buffers, so we can read the files
 		node_id_blob_buff := bytes.NewBuffer(nil)
 
@@ -226,23 +211,7 @@ func setupRoutes(nodeService *node.NodeService) *gin.Engine {
 			log.Println(err.Error())
 		}
 
-		//golden 2
-
-		// Allocate buffers, so we can read the files
-		golden_blob_buf_2 := bytes.NewBuffer(nil)
-
-		// Get multipart.File from FileHeader
-		golden_blob_file_2, err := golden_blob_2.Open()
-		if err != nil {
-			log.Println(err.Error())
-		}
-
-		// Read the file into a buffer
-		_, err = io.Copy(golden_blob_buf_2, golden_blob_file_2)
-		if err != nil {
-			log.Println(err.Error())
-		}
-
+		// signature_blog
 		signature_blob_buf := bytes.NewBuffer(nil)
 		signature_blob_file, err := signature_blob.Open()
 		if err != nil {
@@ -258,30 +227,10 @@ func setupRoutes(nodeService *node.NodeService) *gin.Engine {
 				"error": err.Error(),
 			})
 		}
-
-		// signature 2
-		signature_blob_buf_2 := bytes.NewBuffer(nil)
-		signature_blob_file_2, err := signature_blob_2.Open()
-		if err != nil {
-			log.Println(err.Error())
-			c.JSON(400, gin.H{
-				"error": err.Error(),
-			})
-		}
-		_, err = io.Copy(signature_blob_buf_2, signature_blob_file_2)
-		if err != nil {
-			log.Println(err.Error())
-			c.JSON(400, gin.H{
-				"error": err.Error(),
-			})
-		}
 		log.Println("golden_blob_buff length: ", len(golden_blob_buf.Bytes()))
 		log.Println("signature_blob_buff length: ", len(signature_blob_buf.Bytes()))
 		// evidenceDigest, uuidNodeId, err := nodeService.HandleGoldenValue(nodeID, golden_blob_buf, signature_blob_buf)
-		evidenceDigest, nonce, uuidNodeId, err := nodeService.ProcessEvidence(node_id_blob_buff.String(), golden_blob_buf, signature_blob_buf)
-
-		log.Println("golden_blob_buff length - after ProcessEvidence: ", len(golden_blob_buf_2.Bytes()))
-		log.Println("signature_blob_buff length - after ProcessEvidence: ", len(signature_blob_buf_2.Bytes()))
+		bigEndianBuf, evidenceDigest, nonce, uuidNodeId, err := nodeService.ProcessEvidence(node_id_blob_buff.String(), golden_blob_buf, signature_blob_buf)
 		_ = nonce
 
 		if err != nil {
@@ -290,7 +239,7 @@ func setupRoutes(nodeService *node.NodeService) *gin.Engine {
 				"error": err.Error(),
 			})
 		} else {
-			err = nodeService.RouteGoldenValueToVeraison(globalCfg, VeraisonSessionTable[node_id_blob_buff.String()], uuidNodeId, golden_blob_buf_2, signature_blob_buf_2, evidenceDigest)
+			err = nodeService.RouteGoldenValueToVeraison(globalCfg, VeraisonSessionTable[node_id_blob_buff.String()], uuidNodeId, bigEndianBuf, evidenceDigest)
 			if err != nil {
 				log.Println(err.Error())
 				c.JSON(500, gin.H{
@@ -375,7 +324,7 @@ func setupRoutes(nodeService *node.NodeService) *gin.Engine {
 		}
 
 		// err = nodeService.HandleEvidence(nodeID, evidence_blob_buf, signature_blob_buf)
-		evidenceDigest, nonce, uuidNodeId, err := nodeService.ProcessEvidence(node_id_blob_buff.String(), evidence_blob_buf, signature_blob_buf)
+		bigEndianBuf, evidenceDigest, nonce, uuidNodeId, err := nodeService.ProcessEvidence(node_id_blob_buff.String(), evidence_blob_buf, signature_blob_buf)
 		_ = nonce
 
 		if err != nil {
@@ -388,7 +337,7 @@ func setupRoutes(nodeService *node.NodeService) *gin.Engine {
 			log.Println(node_id_blob_buff.String())
 			log.Println("veraisonSessiontable")
 			log.Println(VeraisonSessionTable)
-			err = nodeService.RouteEvidenceToVeraison(globalCfg, VeraisonSessionTable[node_id_blob_buff.String()], uuidNodeId, evidence_blob_buf, signature_blob_buf, evidenceDigest)
+			err = nodeService.RouteEvidenceToVeraison(globalCfg, VeraisonSessionTable[node_id_blob_buff.String()], uuidNodeId, bigEndianBuf, evidenceDigest)
 			if err != nil {
 				log.Println(err.Error())
 				c.JSON(500, gin.H{
