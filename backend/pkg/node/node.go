@@ -233,9 +233,8 @@ func parseKey(keyString string) (*ecdsa.PublicKey, error) {
 func (n *NodeService) RouteGoldenValueToVeraison(cfg *verification.ChallengeResponseConfig, sessionId string, nodeID uuid.UUID, bigEndianBuf []byte, evidenceDigest []byte) error {
 	// concatenate bytes, because Veraison expects a continious array
 
-	log.Println(fmt.Sprintf("%x", nodeID))
+	fmt.Printf("RouteGolden NodeID Raw bytes: %x\n", [16]byte(nodeID))
 	var concatenatedData []byte = append(nodeID[:], bigEndianBuf...)
-	log.Println(fmt.Sprintf("%x", nodeID))
 	log.Println("concatenatedData length: ", len(concatenatedData))
 	// POST to Veraison
 	attestationResultJSON, err := veraison.SendEvidenceAndSignature(cfg, sessionId, concatenatedData)
